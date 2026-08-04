@@ -38,7 +38,7 @@ public class RubyRingCounterOverlay extends OverlayPanel
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
-			.left("In inventory:")
+			.left("Inventory:")
 			.right(String.valueOf(plugin.getRingCount()))
 			.build());
 
