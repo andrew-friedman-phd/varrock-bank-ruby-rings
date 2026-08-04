@@ -11,7 +11,6 @@ import net.runelite.api.InventoryID;
 import net.runelite.api.Item;
 import net.runelite.api.ItemContainer;
 import net.runelite.api.Player;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.gameval.ItemID;
@@ -107,6 +106,13 @@ public class RubyRingCounterPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		// Don't touch the counters just because the player logged out/hopped worlds - only a
+		// genuine departure from the basement while logged in should reset them.
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+
 		if (!isInTargetArea())
 		{
 			ringCount = 0;
@@ -115,15 +121,6 @@ public class RubyRingCounterPlugin extends Plugin
 		}
 
 		updateRingCount();
-	}
-
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged event)
-	{
-		if (event.getGameState() != GameState.LOGGED_IN)
-		{
-			ringCount = 0;
-		}
 	}
 
 	@Subscribe
