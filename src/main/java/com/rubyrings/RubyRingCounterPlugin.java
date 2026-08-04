@@ -37,6 +37,11 @@ public class RubyRingCounterPlugin extends Plugin
 	// Varrock west bank basement.
 	private static final Set<Integer> ALLOWED_REGIONS = Set.of(12697);
 
+	private static final String CONFIG_GROUP = "rubyringcounter";
+	private static final String KEY_ALCH_COUNT = "sessionAlchCount";
+	private static final String KEY_TOTAL_PROFIT = "sessionTotalProfit";
+	private static final String KEY_TOTAL_XP = "sessionTotalXp";
+
 	@Inject
 	private Client client;
 
@@ -45,6 +50,9 @@ public class RubyRingCounterPlugin extends Plugin
 
 	@Inject
 	private OverlayManager overlayManager;
+
+	@Inject
+	private ConfigManager configManager;
 
 	@Inject
 	private RubyRingCounterConfig config;
@@ -70,6 +78,14 @@ public class RubyRingCounterPlugin extends Plugin
 	protected void startUp()
 	{
 		overlayManager.add(overlay);
+
+		Integer savedAlchCount = configManager.getConfiguration(CONFIG_GROUP, KEY_ALCH_COUNT, Integer.class);
+		Long savedTotalProfit = configManager.getConfiguration(CONFIG_GROUP, KEY_TOTAL_PROFIT, Long.class);
+		Integer savedTotalXp = configManager.getConfiguration(CONFIG_GROUP, KEY_TOTAL_XP, Integer.class);
+
+		alchCount = savedAlchCount == null ? 0 : savedAlchCount;
+		totalProfit = savedTotalProfit == null ? 0 : savedTotalProfit;
+		totalXpGained = savedTotalXp == null ? 0 : savedTotalXp;
 	}
 
 	@Override
@@ -85,6 +101,14 @@ public class RubyRingCounterPlugin extends Plugin
 		alchCount = 0;
 		totalProfit = 0;
 		totalXpGained = 0;
+		persistStats();
+	}
+
+	private void persistStats()
+	{
+		configManager.setConfiguration(CONFIG_GROUP, KEY_ALCH_COUNT, alchCount);
+		configManager.setConfiguration(CONFIG_GROUP, KEY_TOTAL_PROFIT, totalProfit);
+		configManager.setConfiguration(CONFIG_GROUP, KEY_TOTAL_XP, totalXpGained);
 	}
 
 	boolean isInTargetArea()
@@ -173,6 +197,7 @@ public class RubyRingCounterPlugin extends Plugin
 		alchCount++;
 		totalProfit += profit;
 		totalXpGained += HIGH_ALCHEMY_XP;
+		persistStats();
 	}
 
 	private void updateRingCount()
