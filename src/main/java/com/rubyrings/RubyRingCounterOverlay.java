@@ -50,7 +50,7 @@ public class RubyRingCounterOverlay extends OverlayPanel
 		long profit = plugin.getTotalProfit();
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Profit:")
-			.right((profit >= 0 ? "+" : "") + profit + " gp")
+			.right(formatProfit(profit))
 			.rightColor(profit >= 0 ? Color.GREEN : Color.RED)
 			.build());
 
@@ -60,5 +60,13 @@ public class RubyRingCounterOverlay extends OverlayPanel
 			.build());
 
 		return super.render(graphics);
+	}
+
+	private static String formatProfit(long profit)
+	{
+		long abs = Math.abs(profit);
+		String sign = profit >= 0 ? "+" : "-";
+		String amount = abs >= 100_000 ? (abs / 1000) + "k" : abs + " gp";
+		return sign + amount;
 	}
 }
