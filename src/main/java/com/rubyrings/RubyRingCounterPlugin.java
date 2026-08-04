@@ -224,6 +224,9 @@ public class RubyRingCounterPlugin extends Plugin
 	{
 		if ("rubyringcounter".equals(event.getGroup()) && "overlayPosition".equals(event.getKey()))
 		{
+			// A manually dragged position is saved by RuneLite and overrides setPosition() on its
+			// own, so clear that saved override before applying the newly selected position.
+			overlayManager.resetOverlay(overlay);
 			overlay.setPosition(config.overlayPosition().getPosition());
 		}
 	}
