@@ -40,7 +40,7 @@ public interface RubyRingCounterConfig extends Config
 		TOP_LEFT("Top left", OverlayPosition.TOP_LEFT),
 		TOP_RIGHT("Top right", OverlayPosition.TOP_RIGHT),
 		BOTTOM_LEFT("Bottom left", OverlayPosition.BOTTOM_LEFT),
-		BOTTOM_RIGHT("Bottom right (above inventory)", OverlayPosition.BOTTOM_RIGHT),
+		BOTTOM_RIGHT("Bottom right", OverlayPosition.BOTTOM_RIGHT),
 		ABOVE_CHATBOX("Above chatbox", OverlayPosition.ABOVE_CHATBOX_RIGHT);
 
 		private final String label;
