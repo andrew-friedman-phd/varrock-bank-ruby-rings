@@ -108,6 +108,7 @@ public class RubyRingCounterPlugin extends Plugin
 
 	private static final Duration WORLD_COOLDOWN = Duration.ofMinutes(5);
 	private static final Duration HOP_BUTTON_COOLDOWN = Duration.ofSeconds(2);
+	private static final Duration HOP_BUTTON_RETRY_COOLDOWN = Duration.ofMillis(600); // ~1 game tick
 
 	private static final String CONFIG_GROUP = "rubyringcounter";
 	private static final String KEY_ALCH_COUNT = "sessionAlchCount";
@@ -194,6 +195,7 @@ public class RubyRingCounterPlugin extends Plugin
 	private boolean pendingHopWaitedATick;
 	private int emoteIndex;
 	private Instant lastHopButtonPress;
+	private Duration lastHopButtonCooldown = Duration.ZERO;
 
 	@Override
 	protected void startUp()
@@ -578,22 +580,28 @@ public class RubyRingCounterPlugin extends Plugin
 	/**
 	 * Finds a random eligible world under the configured ping threshold and hops to it. Runs the
 	 * world fetch/filter/ping scan off the client thread since pinging can take a couple seconds.
-	 * Debounced so spam-clicking the button doesn't queue up a pile of redundant scans/hops.
+	 * Debounced so spam-clicking the button doesn't queue up a pile of redundant scans/hops - a
+	 * full cooldown once a hop actually starts, but only a single-tick one when the click was
+	 * rejected for leaving a ring behind, so they can retry right after picking it up.
 	 */
 	void hopToRandomWorld()
 	{
 		Instant now = Instant.now();
-		if (lastHopButtonPress != null && Duration.between(lastHopButtonPress, now).compareTo(HOP_BUTTON_COOLDOWN) < 0)
+		if (lastHopButtonPress != null && Duration.between(lastHopButtonPress, now).compareTo(lastHopButtonCooldown) < 0)
 		{
 			return;
 		}
-		lastHopButtonPress = now;
 
 		if (!visibleRubyRingGroundItems.isEmpty())
 		{
+			lastHopButtonPress = now;
+			lastHopButtonCooldown = HOP_BUTTON_RETRY_COOLDOWN;
 			sendChatMessage("You forgot to take the ring!");
 			return;
 		}
+
+		lastHopButtonPress = now;
+		lastHopButtonCooldown = HOP_BUTTON_COOLDOWN;
 
 		log.info("Ruby Ring Counter: hop button clicked");
 		executor.execute(this::findAndHopToWorld);
