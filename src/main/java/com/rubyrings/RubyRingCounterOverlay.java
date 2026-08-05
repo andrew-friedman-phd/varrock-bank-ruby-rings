@@ -20,6 +20,7 @@ public class RubyRingCounterOverlay extends OverlayPanel
 		setPosition(config.overlayPosition().getPosition());
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Reset", "Varrock Bank Ruby Rings", e -> plugin.resetStats());
+		addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Reset /hr", "Varrock Bank Ruby Rings", e -> plugin.resetSessionTimer());
 	}
 
 	@Override
@@ -57,6 +58,25 @@ public class RubyRingCounterOverlay extends OverlayPanel
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Magic XP:")
 			.right(String.valueOf(plugin.getTotalXpGained()))
+			.build());
+
+		// Small gap before the /hr estimates.
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(" ")
+			.build());
+
+		// These only update when an alch actually lands (see RubyRingCounterPlugin.updateRates()),
+		// not live every frame - otherwise the rate swings wildly right at the start of a session.
+		long profitPerHour = plugin.getProfitPerHour();
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left("Profit/hr:")
+			.right(formatProfit(profitPerHour))
+			.rightColor(profitPerHour >= 0 ? Color.GREEN : Color.RED)
+			.build());
+
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left("XP/hr:")
+			.right(String.valueOf(plugin.getXpPerHour()))
 			.build());
 
 		return super.render(graphics);
