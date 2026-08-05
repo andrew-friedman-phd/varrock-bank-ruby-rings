@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,8 @@ import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.ItemDespawned;
+import net.runelite.api.events.ItemSpawned;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.ItemID;
@@ -181,6 +184,8 @@ public class RubyRingCounterPlugin extends Plugin
 	private Emote mistakeEmote;
 	private Instant mistakeTimestamp;
 
+	private final Set<WorldPoint> visibleRubyRingGroundItems = new HashSet<>();
+
 	private final Map<Integer, Instant> worldCooldowns = new HashMap<>();
 	private NavigationButton navButton;
 	private net.runelite.api.World quickHopTarget;
@@ -280,6 +285,24 @@ public class RubyRingCounterPlugin extends Plugin
 	Map<Integer, Instant> getWorldCooldowns()
 	{
 		return worldCooldowns;
+	}
+
+	@Subscribe
+	public void onItemSpawned(ItemSpawned event)
+	{
+		if (event.getItem().getId() == RUBY_RING_ID)
+		{
+			visibleRubyRingGroundItems.add(event.getTile().getWorldLocation());
+		}
+	}
+
+	@Subscribe
+	public void onItemDespawned(ItemDespawned event)
+	{
+		if (event.getItem().getId() == RUBY_RING_ID)
+		{
+			visibleRubyRingGroundItems.remove(event.getTile().getWorldLocation());
+		}
 	}
 
 	@Subscribe
@@ -565,6 +588,12 @@ public class RubyRingCounterPlugin extends Plugin
 			return;
 		}
 		lastHopButtonPress = now;
+
+		if (!visibleRubyRingGroundItems.isEmpty())
+		{
+			sendChatMessage("You forgot to take the ring!");
+			return;
+		}
 
 		log.info("Ruby Ring Counter: hop button clicked");
 		executor.execute(this::findAndHopToWorld);
