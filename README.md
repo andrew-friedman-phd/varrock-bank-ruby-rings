@@ -12,8 +12,7 @@ bank basement - a one-stop shop for the whole Crack the Clue III loot loop.
   common rune shop price - handy for ironmen, who can't rely on the Grand Exchange).
 - Everything only tracks/displays while you're in the Varrock west bank basement, and resets automatically when you
   leave.
-- Right-click the overlay for a "Reset" option to clear the session totals, or "Reset /hr" to restart just the
-  profit/XP-per-hour clock without losing your totals.
+- Right-click the overlay for a "Reset" option to clear the session totals at any time.
 - A sidebar panel tracks which worlds you've already picked a ring up on (5 minute cooldown each) and can hop you to
   a random eligible world under your ping threshold, skipping worlds still on cooldown.
 - Highlights the next emote to perform for Crack the Clue III directly in your Emotes tab and auto-scrolls it into
@@ -30,5 +29,4 @@ bank basement - a one-stop shop for the whole Crack the Clue III loot loop.
 ## Credits
 
 The Crack the Clue III emote sequence and detection/highlighting approach are adapted from Clank1337's
-[CrackTheClue3 Emote](https://github.com/Clank1337/ctc3-emote) plugin (BSD 2-Clause License). This plugin builds on
-that idea as part of a combined tool covering the whole loop rather than just the emote step.
+[CrackTheClue3 Emote](https://github.com/Clank1337/ctc3-emote) plugin (BSD 2-Clause License).

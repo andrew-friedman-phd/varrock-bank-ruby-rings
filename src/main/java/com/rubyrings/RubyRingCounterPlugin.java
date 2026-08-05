@@ -110,11 +110,16 @@ public class RubyRingCounterPlugin extends Plugin
 	private static final Duration HOP_BUTTON_COOLDOWN = Duration.ofSeconds(2);
 	private static final Duration HOP_BUTTON_RETRY_COOLDOWN = Duration.ofMillis(600); // ~1 game tick
 
+	// If a persisted session hasn't been touched in this long, a fresh login treats it as over
+	// rather than reviving old totals against a new, much shorter elapsed time.
+	private static final Duration STALE_SESSION_THRESHOLD = Duration.ofMinutes(10);
+
 	private static final String CONFIG_GROUP = "rubyringcounter";
 	private static final String KEY_ALCH_COUNT = "sessionAlchCount";
 	private static final String KEY_TOTAL_PROFIT = "sessionTotalProfit";
 	private static final String KEY_TOTAL_XP = "sessionTotalXp";
 	private static final String KEY_SESSION_START = "sessionStart";
+	private static final String KEY_LAST_UPDATE = "lastUpdate";
 	private static final String KEY_WORLD_COOLDOWNS = "worldCooldowns";
 	private static final int MAX_QUICK_HOP_ATTEMPTS = 3;
 
@@ -204,15 +209,32 @@ public class RubyRingCounterPlugin extends Plugin
 		overlayManager.add(overlay);
 		overlayManager.add(emoteHelperOverlay);
 
-		Integer savedAlchCount = configManager.getConfiguration(CONFIG_GROUP, KEY_ALCH_COUNT, Integer.class);
-		Long savedTotalProfit = configManager.getConfiguration(CONFIG_GROUP, KEY_TOTAL_PROFIT, Long.class);
-		Integer savedTotalXp = configManager.getConfiguration(CONFIG_GROUP, KEY_TOTAL_XP, Integer.class);
-		Long savedSessionStart = configManager.getConfiguration(CONFIG_GROUP, KEY_SESSION_START, Long.class);
+		Long savedLastUpdate = configManager.getConfiguration(CONFIG_GROUP, KEY_LAST_UPDATE, Long.class);
+		boolean stale = savedLastUpdate == null
+			|| Duration.between(Instant.ofEpochMilli(savedLastUpdate), Instant.now()).compareTo(STALE_SESSION_THRESHOLD) > 0;
 
-		alchCount = savedAlchCount == null ? 0 : savedAlchCount;
-		totalProfit = savedTotalProfit == null ? 0 : savedTotalProfit;
-		totalXpGained = savedTotalXp == null ? 0 : savedTotalXp;
-		sessionStart = (savedSessionStart == null || savedSessionStart < 0) ? null : Instant.ofEpochMilli(savedSessionStart);
+		if (stale)
+		{
+			// Long enough since this was last touched that reviving it would just mean dividing
+			// old totals by a suspiciously short new elapsed time - treat it as a new session.
+			alchCount = 0;
+			totalProfit = 0;
+			totalXpGained = 0;
+			sessionStart = null;
+			persistStats();
+		}
+		else
+		{
+			Integer savedAlchCount = configManager.getConfiguration(CONFIG_GROUP, KEY_ALCH_COUNT, Integer.class);
+			Long savedTotalProfit = configManager.getConfiguration(CONFIG_GROUP, KEY_TOTAL_PROFIT, Long.class);
+			Integer savedTotalXp = configManager.getConfiguration(CONFIG_GROUP, KEY_TOTAL_XP, Integer.class);
+			Long savedSessionStart = configManager.getConfiguration(CONFIG_GROUP, KEY_SESSION_START, Long.class);
+
+			alchCount = savedAlchCount == null ? 0 : savedAlchCount;
+			totalProfit = savedTotalProfit == null ? 0 : savedTotalProfit;
+			totalXpGained = savedTotalXp == null ? 0 : savedTotalXp;
+			sessionStart = (savedSessionStart == null || savedSessionStart < 0) ? null : Instant.ofEpochMilli(savedSessionStart);
+		}
 
 		loadCooldowns();
 
@@ -249,24 +271,13 @@ public class RubyRingCounterPlugin extends Plugin
 		persistStats();
 	}
 
-	/**
-	 * Restarts just the session clock (used for the /hr figures) without touching the totals -
-	 * it'll start ticking again from the next ring pickup or alch cast, same as a fresh session.
-	 */
-	void resetSessionTimer()
-	{
-		sessionStart = null;
-		profitPerHour = 0;
-		xpPerHour = 0;
-		persistStats();
-	}
-
 	private void persistStats()
 	{
 		configManager.setConfiguration(CONFIG_GROUP, KEY_ALCH_COUNT, alchCount);
 		configManager.setConfiguration(CONFIG_GROUP, KEY_TOTAL_PROFIT, totalProfit);
 		configManager.setConfiguration(CONFIG_GROUP, KEY_TOTAL_XP, totalXpGained);
 		configManager.setConfiguration(CONFIG_GROUP, KEY_SESSION_START, sessionStart == null ? -1L : sessionStart.toEpochMilli());
+		configManager.setConfiguration(CONFIG_GROUP, KEY_LAST_UPDATE, Instant.now().toEpochMilli());
 	}
 
 	boolean isInTargetArea()

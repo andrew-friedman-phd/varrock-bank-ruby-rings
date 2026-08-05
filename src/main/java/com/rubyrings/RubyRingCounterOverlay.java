@@ -20,7 +20,6 @@ public class RubyRingCounterOverlay extends OverlayPanel
 		setPosition(config.overlayPosition().getPosition());
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Reset", "Varrock Bank Ruby Rings", e -> plugin.resetStats());
-		addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Reset /hr", "Varrock Bank Ruby Rings", e -> plugin.resetSessionTimer());
 	}
 
 	@Override
