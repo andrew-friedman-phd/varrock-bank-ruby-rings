@@ -58,8 +58,7 @@ import net.runelite.http.api.worlds.WorldType;
 @Slf4j
 @PluginDescriptor(
 	name = "Varrock Bank Ruby Rings",
-	description = "Shows a box above the inventory with your Ruby ring count, and tracks profit/XP from high"
-		+ " alching them in the Varrock west bank basement",
+	description = "Utility for streamlining Varrock Bank heists",
 	tags = {"ruby", "ring", "alch", "alchemy", "profit", "loot", "varrock"}
 )
 public class RubyRingCounterPlugin extends Plugin
