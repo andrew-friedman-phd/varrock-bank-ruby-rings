@@ -196,6 +196,7 @@ public class RubyRingCounterPlugin extends Plugin
 	private int emoteIndex;
 	private Instant lastHopButtonPress;
 	private Duration lastHopButtonCooldown = Duration.ZERO;
+	private int lastCheckedWorld = -1;
 
 	@Override
 	protected void startUp()
@@ -388,8 +389,11 @@ public class RubyRingCounterPlugin extends Plugin
 		{
 			ringCount = 0;
 			resetStats();
+			lastCheckedWorld = -1;
 			return;
 		}
+
+		checkWorldForRing();
 
 		int previousRingCount = ringCount;
 		updateRingCount();
@@ -398,6 +402,28 @@ public class RubyRingCounterPlugin extends Plugin
 		{
 			recordWorldCooldown();
 			startSessionIfNeeded();
+			updateRates();
+			persistStats();
+		}
+	}
+
+	// The first tick we're in the basement on a given world, if there's no ring on the ground,
+	// put that world on cooldown too - it's either already been taken or just isn't spawning
+	// right now, so there's no point hopping back before it would've reset anyway.
+	private void checkWorldForRing()
+	{
+		int currentWorld = client.getWorld();
+		if (currentWorld == lastCheckedWorld)
+		{
+			return;
+		}
+		lastCheckedWorld = currentWorld;
+
+		if (visibleRubyRingGroundItems.isEmpty())
+		{
+			worldCooldowns.put(currentWorld, Instant.now().plus(WORLD_COOLDOWN));
+			persistCooldowns();
+			sendChatMessage("No ring found!");
 		}
 	}
 
