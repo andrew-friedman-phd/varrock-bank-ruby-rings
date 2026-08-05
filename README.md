@@ -1,6 +1,6 @@
 # Varrock Bank Ruby Rings
 
-A RuneLite plugin for tracking Ruby ring crafting and High Level Alchemy profit in the Varrock west bank basement.
+A RuneLite plugin for tracking Ruby rings picked up and High Level Alchemy profit in the Varrock west bank basement.
 
 ## Features
 

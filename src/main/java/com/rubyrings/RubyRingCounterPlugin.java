@@ -27,7 +27,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 	name = "Varrock Bank Ruby Rings",
 	description = "Shows a box above the inventory with your Ruby ring count, and tracks profit/XP from high"
 		+ " alching them in the Varrock west bank basement",
-	tags = {"ruby", "ring", "alch", "alchemy", "profit", "crafting", "varrock"}
+	tags = {"ruby", "ring", "alch", "alchemy", "profit", "loot", "varrock"}
 )
 public class RubyRingCounterPlugin extends Plugin
 {
